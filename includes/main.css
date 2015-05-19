@@ -1,0 +1,84 @@
+.center {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    /* bring your own prefixes */
+    transform: translate(-50%, -50%);
+}
+.below-center{
+    position: fixed;
+    top: 60%;
+    left: 50%;
+    /* bring your own prefixes */
+    transform: translate(-50%, -50%);
+}
+
+.button {
+    display: inline-block;
+    line-height: 1;
+    padding: 7px 10px;
+    text-decoration: none;
+    font-weight: bold;
+    color: #8AC007;
+    background-color: #fff;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -khtml-border-radius: 5px;
+    border-radius: 5px;
+    outline: 0;
+}
+
+.nick-input{
+    width: 200px;
+    height: 40px;
+    border-radius: 10px;
+    border: 2px solid #8AC007;
+    padding: 20px;
+    outline:0;
+}
+
+.scoreboard{
+    position: fixed;
+    top: 20%;
+    left: 15%;
+}
+
+.tile0 {
+    background: #f6f6f6 50% 50% repeat-x;
+    font-weight: bold;
+    color: #8AC007;
+}
+
+.tile1{
+    background: #FECA40; color:white;
+}
+
+.tile2{
+    background: #F39814; color: white;
+}
+
+
+.board{
+    cursor: default;
+    padding-left: 20px;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select:none;
+    user-select:none;
+}
+
+.submit-move{
+    position: fixed;
+    top: 50%;
+    right: 20%;
+    transform: translate(-50%, -50%);
+
+}
+
+.pass-move{
+    position: fixed;
+    top: 50%;
+    right: 15%;
+    transform: translate(-50%, -50%);
+
+}

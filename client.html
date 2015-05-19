@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html ng-app="game">
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Game Live! - Player</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="includes/angular.js"></script>
+    <script src="angular.game.js"></script>
+    <script src="includes/jquery-1.11.2.min.js"></script>
+    <link rel="stylesheet" href="includes/bootstrap.min.css">
+    <link rel="stylesheet" href="includes/main.css">
+
+</head>
+<body ng-controller="ClientCtrl">
+<div class="container">
+
+    <div class="center" ng-hide="initialized">
+        <form ng-submit="joinGame()">
+            <input type="text" class="nick-input" ng-model="nick" placeholder="Your nick!">
+            <input type="text" class="nick-input" ng-model="gameId" placeholder="Game Id">
+            <button class="button">JOIN</button>
+        </form>
+    </div>
+
+    <div ng-show="initialized" class="scoreboard">
+        <p>Game Id is {{gameId}} </p>
+
+        <p ng-show="players.length">Admin is {{players[0]}} ( YOU! )</p>
+
+        <p ng-repeat="player in players track by $index" ng-hide="score.length">{{player}} has joined</p>
+
+        <p ng-repeat="player in players track by $index" ng-show="score.length">{{player}} : {{score[$index]}}</p>
+    </div>
+
+
+    <div ng-show="started">
+        <div class="board center">
+            <div class="row" ng-repeat="row in board track by $index" ng-init="rowIndex = $index">
+                <div class="tile-default" ng-click="changeClass(rowIndex,colIndex)"
+                     ng-class="{'tile0':boardClass[rowIndex][colIndex] == 0,'tile1':boardClass[rowIndex][colIndex] == 1,'tile2':boardClass[rowIndex][colIndex] == 2}"
+                     ng-repeat="col in row track by $index" ng-init="colIndex = $index"
+                     style="float: left; width:30px;padding-left: 2px;text-align: center">{{col}}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div ng-show="myId == currPlayer && started && !finished">
+        <div>
+            <form ng-submit="makeMove()">
+                <button class="button submit-move">SUBMIT</button>
+            </form>
+            <form ng-submit="makePass()">
+                <button class="button pass-move">PASS</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
