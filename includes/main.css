@@ -41,6 +41,8 @@
     position: fixed;
     top: 20%;
     left: 15%;
+    color: #8AC007;
+    font-weight: bold;
 }
 
 .tile0 {

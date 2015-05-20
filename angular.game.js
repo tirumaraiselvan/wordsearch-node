@@ -30,32 +30,125 @@ app.factory('socket', function ($rootScope) {
 
 app.factory('move', function(){
 
-    return function(board, gameId, playerId){
+    return function(board, gameId, playerId, boardState){
 
         console.log('inside move service for gameId ' + gameId );
         console.log(board);
         var len = board.length;
         var isRow = false;
         var isCol = false;
-        var rowId = -1;
-        var colId = -1;
-        for(var i = 0 ; i< len; i++){
-            for(var j= 0 ; j< len; j++){
-                if(board[i][j] == 2){
-                    if((j < len-1) && (board[i][j+1]==2) ) {
-                        isRow = true;
-                        rowId = i;
-                        break;
-                    }
-                    else if((i< len-1) && (board[i+1][j]==2) ) {
-                        isCol = true;
-                        colId = j;
-                        break;
-                    }}}
+        var found = false;
+        var x = -1;
+        var y = -1;
+        var lastx = -1;
+        var lasty = -1;
+
+        //this block finds if there are two contiguous row or col selections
+        for(var i = 0 ; i< len; i++) {
+            for (var j = 0; j < len; j++) {
+                if (board[i][j] == 2 && j < len - 1 && board[i][j + 1] == 2) {
+                    x = i;
+                    y = j;
+                    found = true;
+                    isRow = true;
+                    break;
+                }
+                else if (board[i][j] == 2 && i < len - 1 && board[i + 1][j] == 2) {
+                    x = i;
+                    y = j;
+                    found = true;
+                    isCol = true;
+                    break;
+                }
+            }
+            if(found)
+                break;
         }
 
-      return {'id': gameId, 'playerId': playerId, 'isRow': isRow, 'isCol': isCol, 'startxy':{'x':1, 'y':1}, 'endxy':{'x':1,'y':4}};
+        console.log('start coord: '+x+','+y);
 
+        //if two contiguous row or col selections were found, make sure there are on other selections
+        //apart from the selected row or col
+        if(found){
+            if(isRow){
+                for(var i = 0 ; i< len; i++) {
+                    if(x==i) continue;
+                    for (var j = 0; j < len; j++) {
+                        if(board[i][j] == 2) {
+                            found =false;
+                            break;
+                        }
+                    }}}
+
+            if(isCol) {
+                for (var j = 0; j < len; j++) {
+                    if (j == y) continue;
+                    for (var i = 0; i < len; i++) {
+                        if (board[i][j] == 2) {
+                            found = false;
+                            break;
+                        }
+
+                    }}}}
+
+        console.log('found is' + found);
+
+
+        //make sure the row or col selected has only one continuous chunk
+        if(found){
+            if(isRow){
+                for(var j=0; j<y ;j++)
+                    if(board[x][j] == 2) found= false;
+                for(var j = y; j < len; j++){
+                    if(board[x][j] !=2 && lasty == -1) lasty = j;
+                    else if(board[x][j] == 2 && lasty != -1) found = false;
+                }
+                if(found){
+                    lastx = x;
+                    lasty = lasty-1;
+                }}
+
+            if(isCol){
+                for(var i=0; i<x ;i++)
+                    if(board[i][y] == 2) found= false;
+                for(var i = x; i < len; i++){
+                    if(board[i][y] !=2 && lastx == -1) lastx = i;
+                    else if(board[i][y] == 2 && lastx != -1) found = false;
+                }
+                if(found){
+                    lastx = lastx-1;
+                    lasty = y;
+                }
+            }}
+
+        console.log('end coord: '+lastx+', '+lasty);
+
+        //make sure it is not a previous selection
+        if(found) {
+            var newSelection = false;
+            if (isRow) {
+                for (var j = y; j <= lasty; j++) {
+                    if (boardState[x][j] != 1) {
+                        newSelection = true;
+                        break;
+                    }
+                }
+                if(!newSelection)
+                    found = false;
+            }
+            if (isCol) {
+                for (var i = x; i <= lastx; i++) {
+                    if (boardState[i][y] != 1) {
+                        newSelection = true;
+                        break;
+                    }
+                }
+                if(!newSelection)
+                    found = false;
+            }
+            console.log('new selection is '+newSelection);
+        }
+        return {'id': gameId, 'playerId': playerId, 'found' : found,'isRow': isRow, 'isCol': isCol, 'startxy':{'x':x, 'y':y}, 'endxy':{'x':lastx,'y':lasty}};
     }
 });
 
@@ -96,13 +189,15 @@ app.controller('AdminCtrl', ['$scope', 'socket','move', function ($scope, socket
     };
 
     $scope.makeMove = function() {
-        var moveObj = move($scope.boardClass, $scope.gameId, $scope.myId);
+        var moveObj = move($scope.boardClass, $scope.gameId, $scope.myId, $scope.boardState);
         console.log(moveObj);
-        if(!(moveObj.isRow || moveObj.isCol)){
+        console.log('move obj found is '+moveObj.found);
+        if(!moveObj.found){
             alert('Not Valid Move...Try again!');
             $scope.boardClass = $scope.boardState.map(function(arr) {return arr.slice();});
         }
         else{
+
             socket.emit('make:move',moveObj);
         }
     };
@@ -189,13 +284,15 @@ app.controller('ClientCtrl', ['$scope', 'socket', 'move', function ($scope, sock
 
 
     $scope.makeMove = function() {
-        var moveObj = move($scope.boardClass, $scope.gameId, $scope.myId);
+        var moveObj = move($scope.boardClass, $scope.gameId, $scope.myId, $scope.boardState);
         console.log(moveObj);
-        if(!(moveObj.isRow || moveObj.isCol)){
+        console.log('move obj found is '+moveObj.found);
+        if(!moveObj.found){
             alert('Not Valid Move...Try again!');
             $scope.boardClass = $scope.boardState.map(function(arr) {return arr.slice();});
         }
         else{
+
             socket.emit('make:move',moveObj);
         }
     };
