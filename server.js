@@ -5,7 +5,8 @@
 var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-
+var fs = require('fs');
+var path = require('path');
 
 app.get('/client', function (req, res) {
     res.sendFile('client.html', {root: __dirname});
@@ -36,12 +37,18 @@ app.get('/includes/jquery-ui.js', function (req, res) {
 });
 
 function createNewBoard(len) {
-    var charlist = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
-    board = zero2D(len, len, 'a');
+    var charList = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+    var board = zero2D(len, len, 'a');
     for (var i = 0; i < len; i++)
         for (var j = 0; j < len; j++)
-            board[i][j] = charlist[Math.floor((Math.random() * 25) + 1)]
+            board[i][j] = charList[Math.floor((Math.random() * 25) + 1)]
 
+    var filePath = path.join(__dirname, '/includes/words.txt');
+
+    var wordArray = fs.readFileSync(filePath, 'ascii').toString().split("\n");
+    for(var i=0;i<10; i++) {
+        console.log(array[i]);
+    }
     return board
 }
 
