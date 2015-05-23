@@ -36,7 +36,7 @@ app.get('/includes/jquery-ui.js', function (req, res) {
     res.sendFile('includes/jquery-ui.js', {root: __dirname});
 });
 
-function createNewBoard(len) {
+GameState.prototype.createNewBoard = function(len) {
     var charList = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
     var board = zero2D(len, len, 'a');
     for (var i = 0; i < len; i++)
@@ -45,12 +45,24 @@ function createNewBoard(len) {
 
     var filePath = path.join(__dirname, '/includes/words.txt');
 
-    var wordArray = fs.readFileSync(filePath, 'ascii').toString().split("\n");
-    for(var i=0;i<10; i++) {
-        console.log(array[i]);
+    this.boardWords = fs.readFileSync(filePath, 'ascii').toString().split("\n");
+    for (var i = 0; i < 10; i++) {
+        console.log(this.boardWords[i]);
     }
-    return board
-}
+    for (var i = 0; i < len; i++) {
+        var wordLen = this.boardWords[i].length;
+        while (true) {
+            var x = Math.floor(Math.random() * 15);
+            if (wordLen + x - 1 < len) {
+                for (var k = x, l = 0; l < wordLen; k++, l++)
+                    board[i][k] = this.boardWords[i][l];
+                break;
+            }
+        }
+        console.log(board[i]);
+    }
+    return board;
+};
 
 
 function zero2D(rows, cols, num) {
@@ -122,7 +134,8 @@ GameNode.prototype.notifyAll = function (signal, data) {
 function GameState(id) {
     var game = gameQueue.getGame(id);
     this.id = id;
-    this.board = createNewBoard(15);
+    this.boardWords = null;
+    this.board = this.createNewBoard(15);
     this.boardState = zero2D(this.board.length, this.board.length, 0);
     this.score = Array.apply(null, new Array(game.players.length)).map(Number.prototype.valueOf, 0);
     this.wordsRemaining = 5;
@@ -132,12 +145,37 @@ function GameState(id) {
     game.started = true;
 }
 
+GameState.prototype.validateMove = function(moveObj){
+
+    if (moveObj.isRow) {
+        var start = moveObj.startxy.y;
+        var end = moveObj.endxy.y;
+        var rowId = moveObj.startxy.x;
+        var word ="";
+        for (var j = start; j <= end; j++)
+            word += this.board[rowId][j];
+        return(this.boardWords.indexOf(word)!=-1);
+    }
+    else {
+        var start = moveObj.startxy.x;
+        var end = moveObj.endxy.x;
+        var colId = moveObj.startxy.y;
+        var word ="";
+        for (var i = start; i <= end; i++)
+            word += this.board[i][colId];
+        return(this.boardWords.indexOf(word)!=-1);
+    }
+};
+
 GameState.prototype.updateScore = function (playerIndex, score) {
     console.log('updating score of playerid ' + this.currPlayerIndex + ' to ' + score);
     this.score[playerIndex] += score;
 };
 
 GameState.prototype.makeMove = function (moveObj) {
+    if (!this.validateMove(moveObj)) {
+        return false;
+    }
     if (moveObj.isRow) {
         var start = moveObj.startxy.y;
         var end = moveObj.endxy.y;
@@ -145,6 +183,7 @@ GameState.prototype.makeMove = function (moveObj) {
         for (var j = start; j <= end; j++)
             this.boardState[rowId][j] = 1;
         this.updateScore(this.currPlayerIndex, end - start + 1);
+
     }
     else {
         var start = moveObj.startxy.x;

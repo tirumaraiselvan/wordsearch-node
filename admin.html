@@ -25,11 +25,12 @@
     <div ng-show="initialized" class="scoreboard">
         <p>Game Id is {{gameId}} </p>
 
-        <p ng-show="players.length">Admin is {{players[0]}} ( YOU! )</p>
+        <p ng-show="players.length">Admin is {{players[0]}}</p>
 
         <p ng-repeat="player in players track by $index" ng-hide="score.length">{{player}} has joined</p>
 
         <p ng-repeat="player in players track by $index" ng-show="score.length">{{player}} : {{score[$index]}}</p>
+        <p ng-show="score.length">Words Remaining: {{wordsRemaining}}</p>
 
         <div class="center" ng-hide="started">
             <form ng-submit="startGame()">
@@ -40,6 +41,8 @@
 
 
     <div ng-show="started">
+        <p class="bottom-center" ng-show="!finished">{{players[currPlayerIndex]}}'s move!</p>
+        <p class="bottom-center" ng-show="finished">GAME OVER!</p>
         <div class="board center">
             <div class="row" ng-repeat="row in board track by $index" ng-init="rowIndex = $index">
                 <div class="tile-default" ng-click="changeClass(rowIndex,colIndex)"
