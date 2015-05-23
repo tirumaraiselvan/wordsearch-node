@@ -8,6 +8,11 @@ var io = require('socket.io')(http);
 var fs = require('fs');
 var path = require('path');
 
+
+app.get('/', function(req,res){
+    res.sendFile('index.html',{root: __dirname})
+});
+
 app.get('/client', function (req, res) {
     res.sendFile('client.html', {root: __dirname});
 });
