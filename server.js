@@ -15,8 +15,8 @@ app.get('/', function (req, res) {
 app.get('/client', function (req, res) {
     res.sendFile('client.html', {root: __dirname});
 });
-app.get('/angular.game.js', function (req, res) {
-    res.sendFile('angular.game.js', {root: __dirname})
+app.get('/wordsearch.js', function (req, res) {
+    res.sendFile('wordsearch.js', {root: __dirname})
 });
 app.get('/admin', function (req, res) {
     res.sendFile('admin.html', {root: __dirname});
