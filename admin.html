@@ -14,35 +14,41 @@
 <body ng-controller="AdminCtrl">
 
 <div class="container">
+    <h2 class="title" style="margin-top: 10%">Two Roads Game Page</h2>
+
 
     <div ng-hide="initialized">
         <form ng-submit="createGame()">
             <input type="text" class="nick-input center" ng-model="nick" placeholder="Enter nick!">
-            <button class="button below-center">CREATE</button>
+            <button class="btn btn-primary below-center">CREATE</button>
         </form>
     </div>
 
     <div ng-show="initialized" class="scoreboard">
-        <p>Game Id is {{gameId}} </p>
+        <p>Game Id: {{gameId}} </p>
 
-        <p ng-show="players.length">Admin is {{players[0]}}</p>
+        <p ng-show="players.length">Admin: {{players[0]}}</p>
 
         <p ng-repeat="player in players track by $index" ng-hide="score.length">{{player}} has joined</p>
 
         <p ng-repeat="player in players track by $index" ng-show="score.length">{{player}} : {{score[$index]}}</p>
+
         <p ng-show="score.length">Words Remaining: {{wordsRemaining}}</p>
 
         <div class="center" ng-hide="started">
             <form ng-submit="startGame()">
-                <button class="button">START</button>
+                <button class="btn btn-primary ">START</button>
             </form>
         </div>
     </div>
 
 
     <div ng-show="started">
-        <p class="bottom-center" ng-show="!finished">{{players[currPlayerIndex]}}'s move!</p>
-        <p class="bottom-center" ng-show="finished">GAME OVER!</p>
+        <h3 class="bottom-center" ng-show="!finished" style="font-weight: bold;">{{players[currPlayerIndex]}}'s
+            move!</h3>
+
+        <p class="bottom-center" ng-show="finished" style="font-weight: bold;">GAME OVER!</p>
+
         <div class="board center">
             <div class="row" ng-repeat="row in board track by $index" ng-init="rowIndex = $index">
                 <div class="tile-default" ng-click="changeClass(rowIndex,colIndex)"
@@ -54,13 +60,13 @@
         </div>
     </div>
 
-    <div ng-show="myId == currPlayer && started && !finished">
+    <div ng-show="started && !finished">
         <div>
             <form ng-submit="makeMove()">
-                <button class="button submit-move">SUBMIT</button>
+                <button class="btn btn-primary  submit-move" ng-class="{'disabled':myId != currPlayer}">SUBMIT</button>
             </form>
             <form ng-submit="makePass()">
-                <button class="button pass-move">PASS</button>
+                <button class="btn btn-primary  pass-move" ng-class="{'disabled':myId != currPlayer}">PASS</button>
             </form>
         </div>
     </div>
