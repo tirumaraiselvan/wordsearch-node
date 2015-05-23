@@ -25,20 +25,11 @@ app.get('/admin', function (req, res) {
 app.get('/includes/angular.js', function (req, res) {
     res.sendFile('includes/angular.js', {root: __dirname});
 });
-app.get('/includes/jquery-1.11.2.min.js', function (req, res) {
-    res.sendFile('includes/jquery-1.11.2.min.js', {root: __dirname});
-});
 app.get('/includes/bootstrap.min.css', function (req, res) {
     res.sendFile('includes/bootstrap.min.css', {root: __dirname});
 });
 app.get('/includes/main.css', function (req, res) {
     res.sendFile('includes/main.css', {root: __dirname});
-});
-app.get('/includes/jquery-ui.css', function (req, res) {
-    res.sendFile('includes/jquery-ui.css', {root: __dirname});
-});
-app.get('/includes/jquery-ui.js', function (req, res) {
-    res.sendFile('includes/jquery-ui.js', {root: __dirname});
 });
 
 GameState.prototype.createNewBoard = function (len) {
@@ -51,7 +42,7 @@ GameState.prototype.createNewBoard = function (len) {
     var filePath = path.join(__dirname, '/includes/words.txt');
 
     var allWords = fs.readFileSync(filePath, 'ascii').toString().split("\n");
-    var maxWords = Math.floor(15 + Math.random()*5+1);
+    var maxWords = Math.floor(15 + Math.random() * 5 + 1);
 
 
     for (var i = 0; i < maxWords; i++) {
@@ -76,11 +67,11 @@ GameState.prototype.createNewBoard = function (len) {
                 for (var i = Math.floor(Math.random() * len); i < len; i++) {
                     if (wordLen + x - 1 < len) {
                         checkFit = true;
-                        console.log('fits in row '+i+': '+checkFit);
+                        console.log('fits in row ' + i + ': ' + checkFit);
                         for (var k = x, l = 0; l < wordLen; k++, l++)
                             if ((board[i][k] != '.') && (board[i][k] != this.boardWords[wordIndex][l]))
                                 checkFit = false;
-                        console.log('compatible: '+checkFit);
+                        console.log('compatible: ' + checkFit);
                         if (checkFit) {
                             for (var k = x, l = 0; l < wordLen; k++, l++)
                                 board[i][k] = this.boardWords[wordIndex][l];
@@ -88,18 +79,18 @@ GameState.prototype.createNewBoard = function (len) {
                         }
                     }
                 }
-                if(checkFit) break;
+                if (checkFit) break;
 
             }
             else {
                 for (var j = Math.floor(Math.random() * len); j < len; j++) {
                     if (wordLen + x - 1 < len) {
                         checkFit = true;
-                        console.log('fits in col '+j+': '+checkFit);
+                        console.log('fits in col ' + j + ': ' + checkFit);
                         for (var k = x, l = 0; l < wordLen; k++, l++)
                             if ((board[k][j] != '.') && (board[k][j] != this.boardWords[wordIndex][l]))
                                 checkFit = false;
-                        console.log('compatible: '+checkFit);
+                        console.log('compatible: ' + checkFit);
                         if (checkFit) {
                             for (var k = x, l = 0; l < wordLen; k++, l++)
                                 board[k][j] = this.boardWords[wordIndex][l];
@@ -110,12 +101,16 @@ GameState.prototype.createNewBoard = function (len) {
                 if (checkFit) break;
             }
         }
-        if(checkFit) countBoardWords++;
+        if (checkFit) countBoardWords++;
         isRow = !isRow;
-
     }
 
-    console.log('num words on board is '+countBoardWords);
+    for (var i = 0; i < len; i++)
+        for (var j = 0; j < len; j++)
+            if( board[i][j] == '.')
+                board[i][j] = charList[Math.floor((Math.random() * 25) + 1)];
+
+    console.log('num words on board is ' + countBoardWords);
     this.wordsRemaining = countBoardWords;
     return board;
 };
