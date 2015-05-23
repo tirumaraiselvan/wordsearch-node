@@ -9,8 +9,8 @@ var fs = require('fs');
 var path = require('path');
 
 
-app.get('/', function(req,res){
-    res.sendFile('index.html',{root: __dirname})
+app.get('/', function (req, res) {
+    res.sendFile('index.html', {root: __dirname})
 });
 
 app.get('/client', function (req, res) {
@@ -41,31 +41,82 @@ app.get('/includes/jquery-ui.js', function (req, res) {
     res.sendFile('includes/jquery-ui.js', {root: __dirname});
 });
 
-GameState.prototype.createNewBoard = function(len) {
+GameState.prototype.createNewBoard = function (len) {
     var charList = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
-    var board = zero2D(len, len, 'a');
-    for (var i = 0; i < len; i++)
-        for (var j = 0; j < len; j++)
-            board[i][j] = charList[Math.floor((Math.random() * 25) + 1)]
-
+    var board = zero2D(len, len, '.');
+    /*    for (var i = 0; i < len; i++)
+     for (var j = 0; j < len; j++)
+     board[i][j] = charList[Math.floor((Math.random() * 25) + 1)]
+     */
     var filePath = path.join(__dirname, '/includes/words.txt');
 
-    this.boardWords = fs.readFileSync(filePath, 'ascii').toString().split("\n");
-    for (var i = 0; i < 10; i++) {
+    var allWords = fs.readFileSync(filePath, 'ascii').toString().split("\n");
+    var maxWords = Math.floor(15 + Math.random()*5+1);
+
+
+    for (var i = 0; i < maxWords; i++) {
+        var random = Math.floor(Math.random() * 3000) + 1;
+        this.boardWords.push(allWords[random]);
         console.log(this.boardWords[i]);
     }
-    for (var i = 0; i < len; i++) {
-        var wordLen = this.boardWords[i].length;
-        while (true) {
-            var x = Math.floor(Math.random() * 15);
-            if (wordLen + x - 1 < len) {
-                for (var k = x, l = 0; l < wordLen; k++, l++)
-                    board[i][k] = this.boardWords[i][l];
-                break;
+
+    var isRow = true;
+    var checkFit = false;
+    var countBoardWords = 0;
+    for (var wordIndex = 0; wordIndex < maxWords; wordIndex++) {
+
+        var wordLen = this.boardWords[wordIndex].length;
+        var countTry = 3;
+
+        while (countTry--) {
+            var x = Math.floor(Math.random() * len);
+            console.log('Row? ' + isRow + ', x: ' + x + ' ' + this.boardWords[wordIndex]);
+            checkFit = false;
+            if (isRow) {
+                for (var i = Math.floor(Math.random() * len); i < len; i++) {
+                    if (wordLen + x - 1 < len) {
+                        checkFit = true;
+                        console.log('fits in row '+i+': '+checkFit);
+                        for (var k = x, l = 0; l < wordLen; k++, l++)
+                            if ((board[i][k] != '.') && (board[i][k] != this.boardWords[wordIndex][l]))
+                                checkFit = false;
+                        console.log('compatible: '+checkFit);
+                        if (checkFit) {
+                            for (var k = x, l = 0; l < wordLen; k++, l++)
+                                board[i][k] = this.boardWords[wordIndex][l];
+                            break;
+                        }
+                    }
+                }
+                if(checkFit) break;
+
+            }
+            else {
+                for (var j = Math.floor(Math.random() * len); j < len; j++) {
+                    if (wordLen + x - 1 < len) {
+                        checkFit = true;
+                        console.log('fits in col '+j+': '+checkFit);
+                        for (var k = x, l = 0; l < wordLen; k++, l++)
+                            if ((board[k][j] != '.') && (board[k][j] != this.boardWords[wordIndex][l]))
+                                checkFit = false;
+                        console.log('compatible: '+checkFit);
+                        if (checkFit) {
+                            for (var k = x, l = 0; l < wordLen; k++, l++)
+                                board[k][j] = this.boardWords[wordIndex][l];
+                            break;
+                        }
+                    }
+                }
+                if (checkFit) break;
             }
         }
-        console.log(board[i]);
+        if(checkFit) countBoardWords++;
+        isRow = !isRow;
+
     }
+
+    console.log('num words on board is '+countBoardWords);
+    this.wordsRemaining = countBoardWords;
     return board;
 };
 
@@ -139,36 +190,36 @@ GameNode.prototype.notifyAll = function (signal, data) {
 function GameState(id) {
     var game = gameQueue.getGame(id);
     this.id = id;
-    this.boardWords = null;
+    this.boardWords = [];
+    this.wordsRemaining = -1;
     this.board = this.createNewBoard(15);
     this.boardState = zero2D(this.board.length, this.board.length, 0);
     this.score = Array.apply(null, new Array(game.players.length)).map(Number.prototype.valueOf, 0);
-    this.wordsRemaining = 5;
     this.currPlayer = -1;
     this.currPlayerIndex = -1;
     this.numPlayers = game.players.length;
     game.started = true;
 }
 
-GameState.prototype.validateMove = function(moveObj){
+GameState.prototype.validateMove = function (moveObj) {
 
     if (moveObj.isRow) {
         var start = moveObj.startxy.y;
         var end = moveObj.endxy.y;
         var rowId = moveObj.startxy.x;
-        var word ="";
+        var word = "";
         for (var j = start; j <= end; j++)
             word += this.board[rowId][j];
-        return(this.boardWords.indexOf(word)!=-1);
+        return (this.boardWords.indexOf(word) != -1);
     }
     else {
         var start = moveObj.startxy.x;
         var end = moveObj.endxy.x;
         var colId = moveObj.startxy.y;
-        var word ="";
+        var word = "";
         for (var i = start; i <= end; i++)
             word += this.board[i][colId];
-        return(this.boardWords.indexOf(word)!=-1);
+        return (this.boardWords.indexOf(word) != -1);
     }
 };
 
@@ -294,7 +345,7 @@ io.on('connection', function (socket) {
 
 var port = process.env.PORT || 3000;
 http.listen(port, function () {
-        console.log('listening on port:'+port);
+        console.log('listening on port:' + port);
     }
 );
 

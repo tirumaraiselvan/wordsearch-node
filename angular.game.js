@@ -264,7 +264,6 @@ app.controller('AdminCtrl', ['$scope', 'socket', 'move', function ($scope, socke
         $scope.score = state.score;
         $scope.currPlayerIndex = state.currPlayerIndex;
         $scope.wordsRemaining = state.wordsRemaining;
-
     });
 
     socket.on('game:over', function () {

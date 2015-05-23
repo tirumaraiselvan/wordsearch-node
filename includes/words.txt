@@ -2418,7 +2418,6 @@ appeal
 steady
 stress
 vessel
-mm-hmm
 dining
 wisdom
 garlic
@@ -2520,7 +2519,6 @@ motive
 notice
 temple
 medium
-and/or
 random
 domain
 cattle
@@ -4752,9 +4750,6 @@ replacement
 intelligent
 accommodate
 uncertainty
-health-care
-health-care
-health-care
 health-care
 theoretical
 transaction
