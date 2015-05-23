@@ -12,7 +12,6 @@ var path = require('path');
 app.get('/', function (req, res) {
     res.sendFile('index.html', {root: __dirname})
 });
-
 app.get('/client', function (req, res) {
     res.sendFile('client.html', {root: __dirname});
 });
@@ -22,8 +21,8 @@ app.get('/angular.game.js', function (req, res) {
 app.get('/admin', function (req, res) {
     res.sendFile('admin.html', {root: __dirname});
 });
-app.get('/includes/angular.js', function (req, res) {
-    res.sendFile('includes/angular.js', {root: __dirname});
+app.get('/includes/angular.min.js', function (req, res) {
+    res.sendFile('includes/angular.min.js', {root: __dirname});
 });
 app.get('/includes/bootstrap.min.css', function (req, res) {
     res.sendFile('includes/bootstrap.min.css', {root: __dirname});
@@ -42,7 +41,7 @@ GameState.prototype.createNewBoard = function (len) {
     var filePath = path.join(__dirname, '/includes/words.txt');
 
     var allWords = fs.readFileSync(filePath, 'ascii').toString().split("\n");
-    var maxWords = Math.floor(15 + Math.random() * 5 + 1);
+    var maxWords = 15;
 
 
     for (var i = 0; i < maxWords; i++) {
