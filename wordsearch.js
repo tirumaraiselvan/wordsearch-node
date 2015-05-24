@@ -32,8 +32,6 @@ app.factory('move', function () {
 
     return function (board, gameId, playerId, boardState) {
 
-        console.log('inside move service for gameId ' + gameId);
-        console.log(board);
         var len = board.length;
         var isRow = false;
         var isCol = false;
@@ -64,9 +62,7 @@ app.factory('move', function () {
             if (found)
                 break;
         }
-
         console.log('start coord: ' + x + ',' + y);
-
         //if two contiguous row or col selections were found, make sure there are on other selections
         //apart from the selected row or col
         if (found) {
@@ -95,7 +91,6 @@ app.factory('move', function () {
                 }
             }
         }
-
         //make sure the row or col selected has only one continuous chunk
         if (found) {
             if (isRow) {
@@ -108,7 +103,6 @@ app.factory('move', function () {
                 for(var j = lasty+1; j < len; j++)  //nothing after the continuous chunk
                     if(board[x][j] == 2) found = false;
             }
-
             if (isCol) {
                 lasty = y;
                 for (var i = 0; i < x; i++)
@@ -120,9 +114,7 @@ app.factory('move', function () {
                     if(board[i][y] == 2) found = false;
             }
         }
-
         console.log('end coord: ' + lastx + ', ' + lasty);
-
         //make sure it is not a previous selection
         if (found) {
             var newSelection = false;
@@ -161,9 +153,8 @@ app.factory('move', function () {
 });
 
 
-app.controller('AdminCtrl', ['$scope', 'socket', 'move', function ($scope, socket, move) {
+app.controller('GameCtrl', ['$scope', 'socket', 'move', function ($scope, socket, move) {
 
-    $scope.gameId = -1;
     $scope.players = [];
     $scope.started = false;
     $scope.initialized = false;
@@ -190,6 +181,19 @@ app.controller('AdminCtrl', ['$scope', 'socket', 'move', function ($scope, socke
             $scope.nick = "player" + Math.floor(1000 * Math.random() + 1);
         socket.emit('new:game', $scope.nick);
     };
+
+    $scope.joinGame = function () {
+        console.log('nick is ' + $scope.nick);
+        if ($scope.gameId === undefined) {
+            alert('GameID is mandatory!');
+            return;
+        }
+        if ($scope.nick === "")
+            $scope.nick = "player" + Math.floor(1000 * Math.random() + 1);
+        $scope.initialized = true;
+        socket.emit('new:player', {id: $scope.gameId, nick: $scope.nick});
+    };
+
 
     $scope.startGame = function () {
         if ($scope.players.length > 1)
@@ -271,112 +275,6 @@ app.controller('AdminCtrl', ['$scope', 'socket', 'move', function ($scope, socke
         alert('game over');
     });
 
-}]);
-
-
-app.controller('ClientCtrl', ['$scope', 'socket', 'move', function ($scope, socket, move) {
-
-    $scope.players = [];
-    $scope.started = false;
-    $scope.initialized = false;
-    $scope.currPlayer = -1;
-    $scope.currPlayerIndex = -1;
-    $scope.myId = -1;
-    $scope.myIndex = -1;
-    $scope.nick = "";
-    $scope.wordsRemaining = -1;
-
-    $scope.changeClass = function (row, col) {
-        switch ($scope.boardClass[row][col]) {
-            case 2:
-                $scope.boardClass[row][col] = $scope.boardState[row][col];
-                break;
-            default:
-                $scope.boardClass[row][col] = 2;
-        }
-    };
-
-    $scope.joinGame = function () {
-        console.log('nick is ' + $scope.nick);
-        if ($scope.gameId === undefined) {
-            alert('GameID is mandatory!');
-            return;
-        }
-        if ($scope.nick === "")
-            $scope.nick = "player" + Math.floor(1000 * Math.random() + 1);
-        $scope.initialized = true;
-        socket.emit('new:player', {id: $scope.gameId, nick: $scope.nick});
-    };
-
-
-    $scope.makeMove = function () {
-        var moveObj = move($scope.boardClass, $scope.gameId, $scope.myId, $scope.boardState);
-        console.log('move obj is ');
-        console.log(moveObj);
-        if (!moveObj.found) {
-            alert('Not Valid Move...Try again!');
-            $scope.boardClass = $scope.boardState.map(function (arr) {
-                return arr.slice();
-            });
-        }
-        else {
-
-            socket.emit('make:move', moveObj);
-        }
-    };
-
-    $scope.makePass = function () {
-        var passObj = {'id': $scope.gameId, 'playerId': $scope.myId}
-        socket.emit('make:pass', passObj);
-    };
-
-    socket.on('new:player', function (players) {
-        console.log(players);
-        $scope.players = players;
-    });
-
-    socket.on('game:started', function (state) {
-        console.log(state);
-        $scope.started = true;
-        $scope.board = state.board;
-        $scope.boardClass = state.boardState.map(function (arr) {
-            return arr.slice();
-        });
-        $scope.boardState = state.boardState.map(function (arr) {
-            return arr.slice();
-        });
-        $scope.currPlayer = state.currPlayer;
-        $scope.score = state.score;
-        $scope.currPlayerIndex = state.currPlayerIndex;
-        $scope.wordsRemaining = state.wordsRemaining;
-
-    });
-
-    socket.on('id:player', function (uniqId) {
-        console.log(uniqId);
-        $scope.myId = uniqId;
-    });
-
-    socket.on('move:made', function (state) {
-        console.log(state);
-        $scope.boardClass = state.boardState.map(function (arr) {
-            return arr.slice();
-        });
-        $scope.boardState = state.boardState.map(function (arr) {
-            return arr.slice();
-        });
-        $scope.currPlayer = state.currPlayer;
-        $scope.score = state.score;
-        $scope.currPlayerIndex = state.currPlayerIndex;
-        $scope.wordsRemaining = state.wordsRemaining;
-
-    });
-
-    socket.on('game:over', function () {
-        $scope.finished = true;
-        alert('game over');
-    });
-
     socket.on('undefined:game', function () {
         alert('Server could not find the required GameId');
         $scope.initialized = false;
@@ -386,5 +284,4 @@ app.controller('ClientCtrl', ['$scope', 'socket', 'move', function ($scope, sock
         alert('The required game is already in progress!');
         $scope.initialized = false;
     });
-
 }]);
