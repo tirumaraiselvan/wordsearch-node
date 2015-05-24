@@ -2,59 +2,44 @@
  * Created by tselvan on 5/15/2015.
  */
 
+
+var express  = require('express');
 var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var fs = require('fs');
 var path = require('path');
 
+app.use(express.static(__dirname+'/public'));
 
 app.get('/', function (req, res) {
     res.sendFile('index.html', {root: __dirname})
 });
-app.get('/client', function (req, res) {
-    res.sendFile('client.html', {root: __dirname});
-});
-app.get('/wordsearch.js', function (req, res) {
-    res.sendFile('wordsearch.js', {root: __dirname})
-});
+
 app.get('/admin', function (req, res) {
-    res.sendFile('admin.html', {root: __dirname});
+    res.sendFile('admin.html', {root: __dirname})
 });
-app.get('/includes/angular.min.js', function (req, res) {
-    res.sendFile('includes/angular.min.js', {root: __dirname});
-});
-app.get('/includes/bootstrap.min.css', function (req, res) {
-    res.sendFile('includes/bootstrap.min.css', {root: __dirname});
-});
-app.get('/includes/main.css', function (req, res) {
-    res.sendFile('includes/main.css', {root: __dirname});
+
+app.get('/client', function (req, res) {
+    res.sendFile('client.html', {root: __dirname})
 });
 
 GameState.prototype.createNewBoard = function (len) {
     var charList = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
     var board = zero2D(len, len, '.');
-    /*    for (var i = 0; i < len; i++)
-     for (var j = 0; j < len; j++)
-     board[i][j] = charList[Math.floor((Math.random() * 25) + 1)]
-     */
-    var filePath = path.join(__dirname, '/includes/words.txt');
-
+    var filePath = path.join(__dirname, 'words.txt');
     var allWords = fs.readFileSync(filePath, 'ascii').toString().split("\n");
     var maxWords = 15;
-
 
     for (var i = 0; i < maxWords; i++) {
         var random = Math.floor(Math.random() * 3000) + 1;
         this.boardWords.push(allWords[random]);
         console.log(this.boardWords[i]);
     }
-
     var isRow = true;
     var checkFit = false;
     var countBoardWords = 0;
     for (var wordIndex = 0; wordIndex < maxWords; wordIndex++) {
-
         var wordLen = this.boardWords[wordIndex].length;
         var countTry = 3;
 
@@ -79,7 +64,6 @@ GameState.prototype.createNewBoard = function (len) {
                     }
                 }
                 if (checkFit) break;
-
             }
             else {
                 for (var j = Math.floor(Math.random() * len); j < len; j++) {
@@ -103,7 +87,6 @@ GameState.prototype.createNewBoard = function (len) {
         if (checkFit) countBoardWords++;
         isRow = !isRow;
     }
-
     for (var i = 0; i < len; i++)
         for (var j = 0; j < len; j++)
             if( board[i][j] == '.')
@@ -122,7 +105,6 @@ function zero2D(rows, cols, num) {
     return array;
 }
 
-
 function GameQueue() {
     this.q = {}
 }
@@ -140,7 +122,6 @@ GameQueue.prototype.getGame = function (id) {
         return this.q[id];
     else return null
 };
-
 
 GameQueue.prototype.deleteGame = function (id) {
     this.q[id] = null;
